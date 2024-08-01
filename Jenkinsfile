@@ -5,7 +5,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Checkout code from your GitHub repository
-                git branch: 'main', url: 'https://github.com/FCBTruong/web-test.git'
+                git branch: 'master', url: 'https://github.com/FCBTruong/web-test.git'
             }
         }
 
