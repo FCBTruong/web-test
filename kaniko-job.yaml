@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kaniko-build
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      containers:
+      - name: kaniko
+        image: gcr.io/kaniko-project/executor:latest
+        args:
+        - "--dockerfile=Dockerfile"
+        - "--context=git://github.com/your-repo/your-project.git#main"
+        - "--destination=docker.io/your-username/web-test-ui:latest"
+        env:
+        - name: DOCKER_CONFIG
+          value: /kaniko/.docker/
+        volumeMounts:
+        - name: docker-config
+          mountPath: /kaniko/.docker/
+      restartPolicy: Never
+      volumes:
+      - name: docker-config
+        secret:
+          secretName: regcred
