@@ -4,39 +4,34 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Checkout code from your GitHub repository
-                git branch: 'master', url: 'https://github.com/FCBTruong/web-test.git'
+                checkout scm
             }
         }
-
-        stage('Install Dependencies') {
+        stage('Build Docker Image') {
             steps {
-                // Install npm dependencies
-                sh 'npm install'
+                script {
+                    docker.build('web-test-ui')
+                }
             }
         }
-
-        stage('Run Tests') {
+        stage('Run Tests in Docker') {
             steps {
-                // Run tests
-                sh 'npm test'
+                script {
+                    docker.image('web-test-ui').inside {
+                        sh 'npm test'
+                    }
+                }
             }
         }
-
-        stage('Build') {
+        stage('Push Docker Image') {
             steps {
-                // Build the React project
-                sh 'npm run build'
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                        docker.image('web-test-ui').push('latest')
+                    }
+                }
             }
         }
-    }
 
-    post {
-        success {
-            echo 'Build and tests succeeded!'
-        }
-        failure {
-            echo 'Build or tests failed.'
-        }
     }
 }
