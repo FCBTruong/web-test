@@ -2,6 +2,13 @@ pipeline {
     agent any
 
     stages {
+        stage('Set Docker Environment') {
+            steps {
+                script {
+                    sh 'eval $(minikube -p minikube docker-env)' // Setup to use Minikube's Docker
+                }
+            }
+        }
         stage('Checkout') {
             steps {
                 checkout scm
@@ -32,6 +39,5 @@ pipeline {
                 }
             }
         }
-
     }
 }
