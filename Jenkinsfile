@@ -8,7 +8,7 @@ pipeline {
         DEPLOYMENT_NAME = "web-test-deployment"
         DOCKERHUB_USERNAME = "huytruongnguyen"
         DOCKERHUB_TOKEN = "dckr_pat_KT4mPY8HZUDpQEvQJNBg_0c6LZ8"
-        DOCKER_CONFIG_PATH = '/workspace/.docker'
+        DOCKER_CONFIG_PATH = '/tmp/.docker'
     }
 
     stages {
