@@ -11,28 +11,57 @@ pipeline {
     }
     
     stages {
-         stage('Checkout Code') {
+        stage('Checkout Code') {
             steps {
                 // Checkout code from your Git repository using SSH
                 git branch: 'master', url: 'git@github.com:FCBTruong/web-test.git', credentialsId: 'github'
             }
         }
         
-        stage('Build React App') {
+        stage('Build and Push Docker Image with Kaniko') {
             steps {
                 script {
-                    // Build the React app using Docker
-                    sh 'docker build -t $DOCKER_IMAGE .'
-                }
-            }
-        }
-        
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    // Push the Docker image to Docker Hub
-                    sh 'echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin'
-                    sh 'docker push $DOCKER_IMAGE'
+                    // Create a Kubernetes job to build and push the Docker image using Kaniko
+                    sh """
+                    kubectl create namespace $KUBE_NAMESPACE || true
+                    
+                    kubectl apply -f - <<EOF
+                    apiVersion: batch/v1
+                    kind: Job
+                    metadata:
+                      name: kaniko-build
+                      namespace: $KUBE_NAMESPACE
+                    spec:
+                      template:
+                        spec:
+                          containers:
+                          - name: kaniko
+                            image: gcr.io/kaniko-project/executor:latest
+                            args:
+                            - --dockerfile=Dockerfile
+                            - --context=git://github.com/FCBTruong/web-test.git#master
+                            - --destination=$DOCKER_IMAGE
+                            - --insecure
+                            env:
+                            - name: DOCKER_CONFIG
+                              value: /kaniko/.docker/
+                            volumeMounts:
+                            - name: docker-config
+                              mountPath: /kaniko/.docker/
+                          restartPolicy: Never
+                          volumes:
+                          - name: docker-config
+                            configMap:
+                              name: kaniko-docker-config
+                      backoffLimit: 1
+                    EOF
+                    """
+                    
+                    // Wait for the Kaniko job to complete
+                    sh 'kubectl wait --for=condition=complete --timeout=600s job/kaniko-build --namespace=$KUBE_NAMESPACE'
+                    
+                    // Clean up the Kaniko job
+                    sh 'kubectl delete job kaniko-build --namespace=$KUBE_NAMESPACE'
                 }
             }
         }
