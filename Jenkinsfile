@@ -1,74 +1,96 @@
 pipeline {
     agent any
-
+    
+    environment {
+        DOCKER_IMAGE = "huytruongnguyen/web-test"
+        KUBE_NAMESPACE = "gitops"
+        SERVICE_NAME = "web-test-service"
+        DEPLOYMENT_NAME = "web-test-deployment"
+        DOCKERHUB_USERNAME = "huytruongnguyen"
+        DOCKERHUB_TOKEN = "dckr_pat_KT4mPY8HZUDpQEvQJNBg_0c6LZ8"
+    }
+    
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                checkout scm
+                // Checkout code from your Git repository
+                git 'https://github.com/FCBTruong/web-test.git'
             }
         }
-        stage('Build Docker Image with Kaniko') {
+        
+        stage('Build React App') {
             steps {
                 script {
-                    // Define the Kubernetes Job YAML file for Kaniko
-                    writeFile file: 'kaniko-job.yaml', text: """
-                    apiVersion: batch/v1
-                    kind: Job
-                    metadata:
-                      name: kaniko-build-${env.BUILD_ID}
-                    spec:
-                      backoffLimit: 0
-                      template:
-                        spec:
-                          containers:
-                          - name: kaniko
-                            image: gcr.io/kaniko-project/executor:latest
-                            args:
-                            - "--dockerfile=Dockerfile"
-                            - "--context=git://github.com/your-repo/your-project.git#main"
-                            - "--destination=docker.io/your-username/web-test-ui:${env.BUILD_ID}"
-                            env:
-                            - name: DOCKER_CONFIG
-                              value: /kaniko/.docker/
-                            volumeMounts:
-                            - name: docker-config
-                              mountPath: /kaniko/.docker/
-                          restartPolicy: Never
-                          volumes:
-                          - name: docker-config
-                            secret:
-                              secretName: regcred
-                    """
-                    // Apply the Kubernetes Job
-                    sh 'kubectl apply -f kaniko-job.yaml'
-
-                    // Wait for the Job to complete
-                    sh 'kubectl wait --for=condition=complete job/kaniko-build-${env.BUILD_ID} --timeout=600s'
+                    // Build the React app using Docker
+                    sh 'docker build -t $DOCKER_IMAGE .'
                 }
             }
         }
-        stage('Run Tests in Docker') {
-            steps {
-                script {
-                    // Assuming the image is available, run the tests inside the new Docker image
-                    docker.image("your-username/web-test-ui:${env.BUILD_ID}").inside {
-                        sh 'npm test'
-                    }
-                }
-            }
-        }
+        
         stage('Push Docker Image') {
             steps {
                 script {
-                    // Since the image is already pushed by Kaniko, this stage might be optional
-                    // Here we assume you're using a different tag for 'latest'
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                        sh 'docker pull docker.io/your-username/web-test-ui:${env.BUILD_ID}' // Pull the image
-                        docker.image("your-username/web-test-ui:${env.BUILD_ID}").tag('latest')
-                        docker.image('your-username/web-test-ui').push('latest')
-                    }
+                    // Push the Docker image to Docker Hub
+                    sh 'echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin'
+                    sh 'docker push $DOCKER_IMAGE'
                 }
             }
+        }
+        
+        stage('Deploy to Minikube') {
+            steps {
+                script {
+                    // Use the gitops namespace
+                    sh 'kubectl create namespace $KUBE_NAMESPACE || true'
+                    
+                    // Apply the Kubernetes deployment
+                    sh """
+                    kubectl apply -f - <<EOF
+                    apiVersion: apps/v1
+                    kind: Deployment
+                    metadata:
+                      name: $DEPLOYMENT_NAME
+                      namespace: $KUBE_NAMESPACE
+                    spec:
+                      replicas: 1
+                      selector:
+                        matchLabels:
+                          app: web-test
+                      template:
+                        metadata:
+                          labels:
+                            app: web-test
+                        spec:
+                          containers:
+                          - name: web-test
+                            image: $DOCKER_IMAGE
+                            ports:
+                            - containerPort: 3000
+                    EOF
+                    """
+                    
+                    // Expose the deployment as a service
+                    sh """
+                    kubectl expose deployment $DEPLOYMENT_NAME --type=NodePort --name=$SERVICE_NAME --namespace=$KUBE_NAMESPACE
+                    """
+                }
+            }
+        }
+        
+        stage('Expose Service') {
+            steps {
+                script {
+                    // Use Minikube tunnel to expose the service to localhost
+                    sh 'minikube service $SERVICE_NAME --namespace=$KUBE_NAMESPACE --url'
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Clean up workspace after the build
+            cleanWs()
         }
     }
 }
