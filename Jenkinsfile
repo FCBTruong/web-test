@@ -67,9 +67,9 @@ pipeline {
 
     post {
         always {
-            node {
+            script {
                 // Clean up workspace after the build
-                cleanWs()
+                deleteDir() // This will remove the workspace directory
             }
         }
     }
