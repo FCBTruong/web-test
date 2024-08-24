@@ -1,19 +1,5 @@
 pipeline {
-    agent {
-        kubernetes {
-            yaml """
-            apiVersion: v1
-            kind: Pod
-            spec:
-              containers:
-              - name: kaniko
-                image: gcr.io/kaniko-project/executor:latest
-                command:
-                - cat
-                tty: true
-            """
-        }
-    }
+    agent any
 
     environment {
         DOCKER_IMAGE = "huytruongnguyen/web-test"
@@ -27,26 +13,21 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                // Checkout code from your Git repository using SSH
+                // Checkout code from your Git repository
                 git branch: 'master', url: 'git@github.com:FCBTruong/web-test.git', credentialsId: 'github'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                container('kaniko') {
-                    // Encode Docker Hub credentials and write to Kaniko's config.json
-                    sh '''
-                        echo '{"auths":{"https://index.docker.io/v1/":{"auth":"$(echo -n ${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN} | base64)"}}}' > /kaniko/.docker/config.json
-                    '''
-                    // Build Docker image with Kaniko
-                    sh '''
-                        /kaniko/executor \
-                        --context /workspace \
-                        --dockerfile /workspace/Dockerfile \
-                        --destination ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                    '''
-                }
+                // Build Docker image with Kaniko
+                sh '''
+                    echo '{"auths":{"https://index.docker.io/v1/":{"auth":"$(echo -n ${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN} | base64)"}}}' > /kaniko/.docker/config.json
+                    /kaniko/executor \
+                    --context /workspace \
+                    --dockerfile /workspace/Dockerfile \
+                    --destination ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                '''
             }
         }
 
@@ -63,13 +44,11 @@ pipeline {
                 '''
             }
         }
+    }
 
-        stage('Cleanup Workspace') {
-            agent any
-            steps {
-                // Clean up workspace after the build
-                cleanWs()
-            }
+    post {
+        always {
+            cleanWs() // Clean up workspace after the build
         }
     }
 }
