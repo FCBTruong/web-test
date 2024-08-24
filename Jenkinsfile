@@ -22,9 +22,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Create Docker config file for Kaniko
+                    // Create Docker config file for Kaniko in an existing directory
                     sh """
-                        mkdir -p ${DOCKER_CONFIG_PATH}
                         echo '{"auths":{"https://index.docker.io/v1/":{"auth":"\$(echo -n ${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN} | base64)"}}}' > ${DOCKER_CONFIG_PATH}/config.json
                     """
                     
