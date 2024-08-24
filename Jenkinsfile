@@ -22,16 +22,16 @@ pipeline {
             steps {
                 container('kaniko') {
                     // Encode Docker Hub credentials and write to Kaniko's config.json
-                    sh """
-                        echo '{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"$(echo -n ${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN} | base64)\"}}}' > /kaniko/.docker/config.json
-                    """
+                    sh '''
+                        echo '{"auths":{"https://index.docker.io/v1/":{"auth":"$(echo -n ${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN} | base64)"}}}' > /kaniko/.docker/config.json
+                    '''
                     // Build Docker image with Kaniko
-                    sh """
+                    sh '''
                         /kaniko/executor \
                         --context /workspace \
                         --dockerfile /workspace/Dockerfile \
                         --destination ${DOCKER_IMAGE}:${BUILD_NUMBER}
-                    """
+                    '''
                 }
             }
         }
@@ -39,14 +39,14 @@ pipeline {
         stage('Deploy with Helm') {
             steps {
                 // Deploy the application to Kubernetes using Helm
-                sh """
+                sh '''
                     helm upgrade --install web-test ./charts/web-test \
                     --namespace ${KUBE_NAMESPACE} \
                     --set image.repository=${DOCKER_IMAGE} \
                     --set image.tag=${BUILD_NUMBER} \
                     --set service.name=${SERVICE_NAME} \
                     --set deployment.name=${DEPLOYMENT_NAME}
-                """
+                '''
             }
         }
     }
