@@ -1,5 +1,5 @@
 pipeline {
-     agent {
+    agent {
         kubernetes {
             yaml """
             apiVersion: v1
@@ -67,8 +67,10 @@ pipeline {
 
     post {
         always {
-            // Clean up workspace after the build
-            cleanWs()
+            node {
+                // Clean up workspace after the build
+                cleanWs()
+            }
         }
     }
 }
