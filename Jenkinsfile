@@ -8,7 +8,7 @@ pipeline {
         DEPLOYMENT_NAME = "web-test-deployment"
         DOCKERHUB_USERNAME = "huytruongnguyen"
         DOCKERHUB_TOKEN = "dckr_pat_KT4mPY8HZUDpQEvQJNBg_0c6LZ8"
-        DOCKER_CONFIG_PATH = '/kaniko/.docker'
+        DOCKER_CONFIG_PATH = '/workspace/.docker'
     }
 
     stages {
@@ -22,17 +22,19 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Create Docker config file for Kaniko in an existing directory
+                    // Create Docker config file for Kaniko in a writable directory
                     sh """
+                        mkdir -p ${DOCKER_CONFIG_PATH}
                         echo '{"auths":{"https://index.docker.io/v1/":{"auth":"\$(echo -n ${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN} | base64)"}}}' > ${DOCKER_CONFIG_PATH}/config.json
                     """
                     
                     // Build Docker image with Kaniko
                     sh """
                         /kaniko/executor \
-                        --context /workspace \
                         --dockerfile /workspace/Dockerfile \
-                        --destination ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                        --context /workspace \
+                        --destination ${DOCKER_IMAGE}:${BUILD_NUMBER} \
+                        --docker-config=${DOCKER_CONFIG_PATH}
                     """
                 }
             }
