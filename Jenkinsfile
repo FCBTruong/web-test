@@ -1,5 +1,19 @@
 pipeline {
-    agent any
+     agent {
+        kubernetes {
+            yaml """
+            apiVersion: v1
+            kind: Pod
+            spec:
+              containers:
+              - name: kaniko
+                image: gcr.io/kaniko-project/executor:latest
+                command:
+                - cat
+                tty: true
+            """
+        }
+    }
 
     environment {
         DOCKER_IMAGE = "huytruongnguyen/web-test"
