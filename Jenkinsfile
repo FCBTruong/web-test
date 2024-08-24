@@ -11,10 +11,10 @@ pipeline {
     }
     
     stages {
-        stage('Checkout Code') {
+         stage('Checkout Code') {
             steps {
-                // Checkout code from your Git repository
-                git 'https://github.com/FCBTruong/web-test.git'
+                // Checkout code from your Git repository using SSH
+                git branch: 'master', url: 'git@github.com:FCBTruong/web-test.git', credentialsId: 'github'
             }
         }
         
