@@ -63,13 +63,12 @@ pipeline {
                 '''
             }
         }
-    }
 
-    post {
-        always {
-            script {
+        stage('Cleanup Workspace') {
+            agent any
+            steps {
                 // Clean up workspace after the build
-                deleteDir() // This will remove the workspace directory
+                cleanWs()
             }
         }
     }
