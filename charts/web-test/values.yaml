@@ -1,0 +1,19 @@
+name: web-test
+replicaCount: 2
+
+image:
+  repository: huytruongnguyen/web-test
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  annotations: {}
+  hosts:
+    - host: web-test.example.com
+      paths: ["/"]
+  tls: []
