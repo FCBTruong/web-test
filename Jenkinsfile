@@ -1,11 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'gcr.io/kaniko-project/executor:v1.23.2'
-            args '-v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}:/workspace'
-        }
-    }
-
+    agent any
     environment {
         DOCKER_IMAGE = "huytruongnguyen/web-test"
         KUBE_NAMESPACE = "gitops"
@@ -23,7 +17,7 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Image with Haniko') {
             steps {
                 script {
                     sh """
