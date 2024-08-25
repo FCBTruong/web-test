@@ -26,7 +26,8 @@ pipeline {
                         mkdir -p \$(dirname ${KANIKO_EXECUTOR_PATH})
                         curl -sSL https://github.com/GoogleContainerTools/kaniko/releases/download/v1.5.0/executor -o ${KANIKO_EXECUTOR_PATH}
                         chmod +x ${KANIKO_EXECUTOR_PATH}
-                        ls -l ${KANIKO_EXECUTOR_PATH}  # Check the file
+                        ls -lh ${KANIKO_EXECUTOR_PATH}  # List the file with details
+                        head -n 10 ${KANIKO_EXECUTOR_PATH}  # Check the first few lines of the file
                     """
                 }
             }
