@@ -9,7 +9,7 @@ pipeline {
         DOCKERHUB_USERNAME = "huytruongnguyen"
         DOCKERHUB_TOKEN = "dckr_pat_KT4mPY8HZUDpQEvQJNBg_0c6LZ8"
         DOCKER_CONFIG_PATH = "${WORKSPACE}/.docker"
-        KANIKO_EXECUTOR_PATH = "${WORKSPACE}/kaniko"
+        KANIKO_EXECUTOR_PATH = "${WORKSPACE}/kaniko/executor"
     }
 
     stages {
@@ -23,10 +23,10 @@ pipeline {
             steps {
                 script {
                     sh """
-                        mkdir -p ${KANIKO_EXECUTOR_PATH}
-                        curl -sSL https://github.com/GoogleContainerTools/kaniko/releases/download/v1.5.0/executor -o ${KANIKO_EXECUTOR_PATH}/executor
-                        chmod +x ${KANIKO_EXECUTOR_PATH}/executor
-                        file ${KANIKO_EXECUTOR_PATH}/executor  # Verify that it's a valid executable
+                        mkdir -p $(dirname ${KANIKO_EXECUTOR_PATH})
+                        curl -sSL https://github.com/GoogleContainerTools/kaniko/releases/download/v1.5.0/executor -o ${KANIKO_EXECUTOR_PATH}
+                        chmod +x ${KANIKO_EXECUTOR_PATH}
+                        ls -l ${KANIKO_EXECUTOR_PATH}  # Check the file
                     """
                 }
             }
@@ -39,7 +39,7 @@ pipeline {
                         mkdir -p ${DOCKER_CONFIG_PATH}
                         echo '{"auths":{"https://index.docker.io/v1/":{"auth":"\$(echo -n ${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN} | base64)"}}}' > ${DOCKER_CONFIG_PATH}/config.json
 
-                        ${KANIKO_EXECUTOR_PATH}/executor \
+                        ${KANIKO_EXECUTOR_PATH} \
                         --dockerfile /workspace/Dockerfile \
                         --context /workspace \
                         --destination ${DOCKER_IMAGE}:${BUILD_NUMBER} \
