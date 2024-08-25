@@ -8,7 +8,7 @@ pipeline {
         DEPLOYMENT_NAME = "web-test-deployment"
         DOCKERHUB_USERNAME = "huytruongnguyen"
         DOCKERHUB_TOKEN = "dckr_pat_KT4mPY8HZUDpQEvQJNBg_0c6LZ8"
-        DOCKER_CONFIG_PATH = '/kaniko/.docker'
+        DOCKER_CONFIG_PATH = "${WORKSPACE}/.docker"  // Change to a workspace directory
     }
 
     stages {
