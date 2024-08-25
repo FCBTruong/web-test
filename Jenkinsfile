@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'gcr.io/kaniko-project/executor:v1.23.2'  // Use the specific Kaniko version or 'latest'
+            args '-v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}:/workspace'
+        }
+    }
 
     environment {
         DOCKER_IMAGE = "huytruongnguyen/web-test"
@@ -8,28 +13,13 @@ pipeline {
         DEPLOYMENT_NAME = "web-test-deployment"
         DOCKERHUB_USERNAME = "huytruongnguyen"
         DOCKERHUB_TOKEN = "dckr_pat_KT4mPY8HZUDpQEvQJNBg_0c6LZ8"
-        DOCKER_CONFIG_PATH = "${WORKSPACE}/.docker"
-        KANIKO_EXECUTOR_PATH = "${WORKSPACE}/kaniko/executor"
+        DOCKER_CONFIG_PATH = "/kaniko/.docker"
     }
 
     stages {
         stage('Checkout Code') {
             steps {
                 git branch: 'master', url: 'git@github.com:FCBTruong/web-test.git', credentialsId: 'github'
-            }
-        }
-
-        stage('Install Kaniko') {
-            steps {
-                script {
-                    sh """
-                        mkdir -p \$(dirname ${KANIKO_EXECUTOR_PATH})
-                        curl -sSL https://github.com/GoogleContainerTools/kaniko/releases/tag/v1.23.2/executor -o ${KANIKO_EXECUTOR_PATH}
-                        chmod +x ${KANIKO_EXECUTOR_PATH}
-                        ls -lh ${KANIKO_EXECUTOR_PATH}  # List the file with details
-                        head -n 10 ${KANIKO_EXECUTOR_PATH}  # Check the first few lines of the file
-                    """
-                }
             }
         }
 
@@ -40,7 +30,7 @@ pipeline {
                         mkdir -p ${DOCKER_CONFIG_PATH}
                         echo '{"auths":{"https://index.docker.io/v1/":{"auth":"\$(echo -n ${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN} | base64)"}}}' > ${DOCKER_CONFIG_PATH}/config.json
 
-                        ${KANIKO_EXECUTOR_PATH} \
+                        /kaniko/executor \
                         --dockerfile /workspace/Dockerfile \
                         --context /workspace \
                         --destination ${DOCKER_IMAGE}:${BUILD_NUMBER} \
