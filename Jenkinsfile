@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'gcr.io/kaniko-project/executor:latest'
-            args '-v /kaniko/.docker:/kaniko/.docker'
-        }
-    }
+    agent any
 
     environment {
         DOCKER_IMAGE = "huytruongnguyen/web-test"
