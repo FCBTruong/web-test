@@ -22,14 +22,14 @@ pipeline {
             steps {
                 script {
                     sh """
-                        mkdir -p ${DOCKER_CONFIG_PATH}
-                        echo '{"auths":{"https://index.docker.io/v1/":{"auth":"'$(echo -n ${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN} | base64)'"}}}' > ${DOCKER_CONFIG_PATH}/config.json
+                        mkdir -p \${DOCKER_CONFIG_PATH}
+                        echo '{"auths":{"https://index.docker.io/v1/":{"auth":"'\$(echo -n \${DOCKERHUB_USERNAME}:\${DOCKERHUB_TOKEN} | base64)'"}}}' > \${DOCKER_CONFIG_PATH}/config.json
 
                         /kaniko/executor \
                         --dockerfile /workspace/Dockerfile \
                         --context /workspace \
-                        --destination ${DOCKER_IMAGE}:${BUILD_NUMBER} \
-                        --docker-config=${DOCKER_CONFIG_PATH}
+                        --destination \${DOCKER_IMAGE}:\${BUILD_NUMBER} \
+                        --docker-config=\${DOCKER_CONFIG_PATH}
                     """
                 }
             }
@@ -39,12 +39,12 @@ pipeline {
             steps {
                 script {
                     sh """
-                        helm upgrade --install ${DEPLOYMENT_NAME} ./charts/web-test \
-                        --namespace ${KUBE_NAMESPACE} \
-                        --set image.repository=${DOCKER_IMAGE} \
-                        --set image.tag=${BUILD_NUMBER} \
-                        --set service.name=${SERVICE_NAME} \
-                        --set deployment.name=${DEPLOYMENT_NAME}
+                        helm upgrade --install \${DEPLOYMENT_NAME} ./charts/web-test \
+                        --namespace \${KUBE_NAMESPACE} \
+                        --set image.repository=\${DOCKER_IMAGE} \
+                        --set image.tag=\${BUILD_NUMBER} \
+                        --set service.name=\${SERVICE_NAME} \
+                        --set deployment.name=\${DEPLOYMENT_NAME}
                     """
                 }
             }
