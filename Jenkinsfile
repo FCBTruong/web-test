@@ -8,13 +8,26 @@ pipeline {
         DEPLOYMENT_NAME = "web-test-deployment"
         DOCKERHUB_USERNAME = "huytruongnguyen"
         DOCKERHUB_TOKEN = "dckr_pat_KT4mPY8HZUDpQEvQJNBg_0c6LZ8"
-        DOCKER_CONFIG_PATH = "${WORKSPACE}/.docker"  // Change to a workspace directory
+        DOCKER_CONFIG_PATH = "${WORKSPACE}/.docker"
+        KANIKO_EXECUTOR_PATH = "${WORKSPACE}/kaniko"
     }
 
     stages {
         stage('Checkout Code') {
             steps {
                 git branch: 'master', url: 'git@github.com:FCBTruong/web-test.git', credentialsId: 'github'
+            }
+        }
+
+        stage('Install Kaniko') {
+            steps {
+                script {
+                    sh """
+                        mkdir -p ${KANIKO_EXECUTOR_PATH}
+                        curl -sSL https://github.com/GoogleContainerTools/kaniko/releases/download/v1.5.0/executor -o ${KANIKO_EXECUTOR_PATH}/executor
+                        chmod +x ${KANIKO_EXECUTOR_PATH}/executor
+                    """
+                }
             }
         }
 
@@ -25,7 +38,7 @@ pipeline {
                         mkdir -p ${DOCKER_CONFIG_PATH}
                         echo '{"auths":{"https://index.docker.io/v1/":{"auth":"\$(echo -n ${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN} | base64)"}}}' > ${DOCKER_CONFIG_PATH}/config.json
 
-                        /kaniko/executor \
+                        ${KANIKO_EXECUTOR_PATH}/executor \
                         --dockerfile /workspace/Dockerfile \
                         --context /workspace \
                         --destination ${DOCKER_IMAGE}:${BUILD_NUMBER} \
