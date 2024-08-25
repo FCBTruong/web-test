@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'gcr.io/kaniko-project/executor:v1.23.2'  // Use the specific Kaniko version or 'latest'
+            image 'gcr.io/kaniko-project/executor:v1.23.2'
             args '-v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}:/workspace'
         }
     }
