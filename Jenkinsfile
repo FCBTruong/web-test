@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     environment {
         DOCKER_IMAGE = "huytruongnguyen/web-test"
         KUBE_NAMESPACE = "gitops"
@@ -7,7 +8,7 @@ pipeline {
         DEPLOYMENT_NAME = "web-test-deployment"
         DOCKERHUB_USERNAME = "huytruongnguyen"
         DOCKERHUB_TOKEN = "dckr_pat_KT4mPY8HZUDpQEvQJNBg_0c6LZ8"
-        DOCKER_CONFIG_PATH = "/kaniko/.docker"
+        DOCKER_CONFIG_PATH = "${WORKSPACE}/.docker"
     }
 
     stages {
@@ -17,12 +18,12 @@ pipeline {
             }
         }
 
-        stage('Build Image with Haniko') {
+        stage('Build Docker Image') {
             steps {
                 script {
                     sh """
                         mkdir -p ${DOCKER_CONFIG_PATH}
-                        echo '{"auths":{"https://index.docker.io/v1/":{"auth":"\$(echo -n ${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN} | base64)"}}}' > ${DOCKER_CONFIG_PATH}/config.json
+                        echo '{"auths":{"https://index.docker.io/v1/":{"auth":"'$(echo -n ${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN} | base64)'"}}}' > ${DOCKER_CONFIG_PATH}/config.json
 
                         /kaniko/executor \
                         --dockerfile /workspace/Dockerfile \
