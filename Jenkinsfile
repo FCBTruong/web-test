@@ -26,6 +26,7 @@ pipeline {
                         mkdir -p ${KANIKO_EXECUTOR_PATH}
                         curl -sSL https://github.com/GoogleContainerTools/kaniko/releases/download/v1.5.0/executor -o ${KANIKO_EXECUTOR_PATH}/executor
                         chmod +x ${KANIKO_EXECUTOR_PATH}/executor
+                        file ${KANIKO_EXECUTOR_PATH}/executor  # Verify that it's a valid executable
                     """
                 }
             }
