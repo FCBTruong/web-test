@@ -23,7 +23,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        mkdir -p $(dirname ${KANIKO_EXECUTOR_PATH})
+                        mkdir -p \$(dirname ${KANIKO_EXECUTOR_PATH})
                         curl -sSL https://github.com/GoogleContainerTools/kaniko/releases/download/v1.5.0/executor -o ${KANIKO_EXECUTOR_PATH}
                         chmod +x ${KANIKO_EXECUTOR_PATH}
                         ls -l ${KANIKO_EXECUTOR_PATH}  # Check the file
