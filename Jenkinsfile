@@ -21,23 +21,19 @@ pipeline {
             steps {
                 container('kaniko') {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
-                        script {
-                            // Create .docker/config.json for authentication
-                            sh '''
-                            mkdir -p ${DOCKER_CONFIG_PATH}
-                            echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"${DOCKERHUB_USERNAME}\",\"password\":\"${DOCKERHUB_TOKEN}\"}}}" > ${DOCKER_CONFIG_PATH}/config.json
-                            '''
+                        sh '''
+                        mkdir -p ${DOCKER_CONFIG_PATH}
+                        echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"${DOCKERHUB_USERNAME}\",\"password\":\"${DOCKERHUB_TOKEN}\"}}}" > ${DOCKER_CONFIG_PATH}/config.json
+                        '''
 
-                            // Run Kaniko to build and push the Docker image
-                            sh '''
-                            /kaniko/executor --dockerfile `pwd`/Dockerfile \
-                                --context `pwd` \
-                                --destination ${DOCKER_IMAGE} \
-                                --cleanup \
-                                --cache=true \
-                                --cache-repo=${DOCKER_IMAGE}-cache
-                            '''
-                        }
+                        sh '''
+                        /kaniko/executor --dockerfile `pwd`/Dockerfile \
+                            --context `pwd` \
+                            --destination ${DOCKER_IMAGE} \
+                            --cleanup \
+                            --cache=true \
+                            --cache-repo=${DOCKER_IMAGE}-cache
+                        '''
                     }
                 }
             }
@@ -45,10 +41,10 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                script {
-                    // Here, you can add steps to deploy the built image to your Kubernetes cluster
-                    // For example, using kubectl or helm commands
-                }
+                // Add your deployment steps here, such as kubectl or helm commands
+                echo "Deploying to Kubernetes..."
+                // Example:
+                // sh 'kubectl apply -f deployment.yaml -n ${KUBE_NAMESPACE}'
             }
         }
     }
