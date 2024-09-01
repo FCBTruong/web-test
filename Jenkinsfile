@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label 'kubeagent'  // This will use the kubeagent pod template
+    }
 
     environment {
         DOCKER_IMAGE = "huytruongnguyen/web-test"
@@ -18,12 +20,9 @@ pipeline {
         }
 
         stage('Build and Push Docker Image') {
-            agent {
-                label 'kubeagent'
-            }
             steps {
-                    container('kaniko') {
-                        withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
+                container('kaniko') {  // Ensure the container name matches the one defined in your pod template
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
                         sh '''
                         mkdir -p ${DOCKER_CONFIG_PATH}
                         echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"${DOCKERHUB_USERNAME}\",\"password\":\"${DOCKERHUB_TOKEN}\"}}}" > ${DOCKER_CONFIG_PATH}/config.json
@@ -44,10 +43,8 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                // Add your deployment steps here, such as kubectl or helm commands
                 echo "Deploying to Kubernetes..."
-                // Example:
-                // sh 'kubectl apply -f deployment.yaml -n ${KUBE_NAMESPACE}'
+                // Add your deployment steps here, such as kubectl or helm commands
             }
         }
     }
