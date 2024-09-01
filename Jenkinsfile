@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label 'kubeagent'
+    }
 
     environment {
         DOCKER_IMAGE = "huytruongnguyen/web-test"
@@ -18,9 +20,6 @@ pipeline {
         }
 
         stage('Build and Push Docker Image') {
-            agent {
-                label 'kubeagent'
-            }
             steps {
                     container('kaniko') {
                         withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
