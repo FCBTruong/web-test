@@ -5,11 +5,19 @@ pipeline {
         KUBE_NAMESPACE = "gitops"
         SERVICE_NAME = "web-test-service"
         DEPLOYMENT_NAME = "web-test-deployment"
-        DOCKER_CONFIG_PATH = "${WORKSPACE}/.docker"
         KANIKO_EXECUTOR_IMAGE = "gcr.io/kaniko-project/executor:latest"
     }
 
     stages {
+        stage('Prepare Environment') {
+            steps {
+                script {
+                    // Add GitHub to known_hosts to avoid host key verification issues
+                    sh 'mkdir -p ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts'
+                }
+            }
+        }
+
         stage('Build and Push Docker Image') {
             agent {
                 label 'kubeagent'
@@ -17,19 +25,17 @@ pipeline {
             steps {
                 container('kaniko') {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
-                        sh '''
-                        mkdir -p ${DOCKER_CONFIG_PATH}
-                        echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"${DOCKERHUB_USERNAME}\",\"password\":\"${DOCKERHUB_TOKEN}\"}}}" > ${DOCKER_CONFIG_PATH}/config.json
-                        '''
-
-                        sh '''
-                        /kaniko/executor --dockerfile `pwd`/Dockerfile \
-                            --context `pwd` \
-                            --destination ${DOCKER_IMAGE} \
-                            --cleanup \
-                            --cache=true \
-                            --cache-repo=${DOCKER_IMAGE}-cache
-                        '''
+                        script {
+                            // Kaniko build steps (previously discussed)
+                            sh '''
+                            /kaniko/executor --dockerfile `pwd`/Dockerfile \
+                                --context `pwd` \
+                                --destination ${DOCKER_IMAGE} \
+                                --cleanup \
+                                --cache=true \
+                                --cache-repo=${DOCKER_IMAGE}-cache
+                            '''
+                        }
                     }
                 }
             }
