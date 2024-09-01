@@ -7,6 +7,7 @@ pipeline {
         SERVICE_NAME = "web-test-service"
         DEPLOYMENT_NAME = "web-test-deployment"
         DOCKER_CONFIG_PATH = "${WORKSPACE}/.docker"
+        KANIKO_EXECUTOR_IMAGE = "gcr.io/kaniko-project/executor:latest"
     }
 
     stages {
@@ -16,36 +17,25 @@ pipeline {
             }
         }
 
-         stage('Build and Push Docker Image') {
+        stage('Build and Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
-                    container('kaniko') {
+                container('kaniko') {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
                         script {
+                            // Create .docker/config.json for authentication
                             sh '''
-                            echo "Building and pushing Docker image with Kaniko..."
+                            mkdir -p ${DOCKER_CONFIG_PATH}
+                            echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"${DOCKERHUB_USERNAME}\",\"password\":\"${DOCKERHUB_TOKEN}\"}}}" > ${DOCKER_CONFIG_PATH}/config.json
+                            '''
 
-                            # Create a Docker config.json file with the DockerHub credentials
-                            mkdir -p /kaniko/.docker
-                            cat > /kaniko/.docker/config.json <<EOL
-                            {
-                                "auths": {
-                                    "https://index.docker.io/v1/": {
-                                        "auth": "$(echo -n ${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN} | base64)"
-                                    }
-                                }
-                            }
-                            EOL
-
-                            # Use Kaniko to build and push the Docker image
-                            /kaniko/executor \
-                                --context . \
-                                --dockerfile Dockerfile \
-                                --destination docker.io/${DOCKERHUB_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}
-
-                            if [ $? -ne 0 ]; then
-                                echo "Error building Docker image with Kaniko. Exiting."
-                                exit 1
-                            fi
+                            // Run Kaniko to build and push the Docker image
+                            sh '''
+                            /kaniko/executor --dockerfile `pwd`/Dockerfile \
+                                --context `pwd` \
+                                --destination ${DOCKER_IMAGE} \
+                                --cleanup \
+                                --cache=true \
+                                --cache-repo=${DOCKER_IMAGE}-cache
                             '''
                         }
                     }
@@ -53,22 +43,11 @@ pipeline {
             }
         }
 
-        stage('Deploy with Helm') {
+        stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh '''
-                        echo "Deploying with Helm..."
-                        helm upgrade --install ${DEPLOYMENT_NAME} ./charts/web-test \
-                        --namespace ${KUBE_NAMESPACE} \
-                        --set image.repository=${DOCKER_IMAGE} \
-                        --set image.tag=${BUILD_NUMBER} \
-                        --set service.name=${SERVICE_NAME} \
-                        --set deployment.name=${DEPLOYMENT_NAME}
-                        if [ $? -ne 0 ]; then
-                            echo "Error deploying with Helm. Exiting."
-                            exit 1
-                        fi
-                    '''
+                    // Here, you can add steps to deploy the built image to your Kubernetes cluster
+                    // For example, using kubectl or helm commands
                 }
             }
         }
