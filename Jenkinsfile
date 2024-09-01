@@ -8,16 +8,12 @@ pipeline {
         DOCKER_CONFIG_PATH = "${WORKSPACE}/.docker"
         KANIKO_EXECUTOR_IMAGE = "gcr.io/kaniko-project/executor:latest"
     }
+    options {
+        skipDefaultCheckout()
+    }
 
     stages {
-        stage('Checkout Code') {
-            steps {
-                script {
-                    // Main Jenkins node clones the repository
-                    checkout scm
-                }
-            }
-        }
+
 
         stage('Build and Push Docker Image') {
             agent {
