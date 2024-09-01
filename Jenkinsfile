@@ -12,6 +12,12 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
+                script {
+                    // Add GitHub SSH host key to known_hosts to prevent host key verification failures
+                    sh 'mkdir -p ~/.ssh'
+                    sh 'ssh-keyscan github.com >> ~/.ssh/known_hosts'
+                }
+                // Checkout code from GitHub using the provided credentials
                 git branch: 'master', url: 'git@github.com:FCBTruong/web-test.git', credentialsId: 'github'
             }
         }
@@ -21,8 +27,8 @@ pipeline {
                 label 'kubeagent'
             }
             steps {
-                    container('kaniko') {
-                        withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
+                container('kaniko') {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
                         sh '''
                         mkdir -p ${DOCKER_CONFIG_PATH}
                         echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"${DOCKERHUB_USERNAME}\",\"password\":\"${DOCKERHUB_TOKEN}\"}}}" > ${DOCKER_CONFIG_PATH}/config.json
@@ -43,9 +49,8 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                // Add your deployment steps here, such as kubectl or helm commands
                 echo "Deploying to Kubernetes..."
-                // Example:
+                // Example deployment step
                 // sh 'kubectl apply -f deployment.yaml -n ${KUBE_NAMESPACE}'
             }
         }
