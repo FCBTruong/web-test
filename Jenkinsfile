@@ -6,8 +6,6 @@ pipeline {
         KUBE_NAMESPACE = "gitops"
         SERVICE_NAME = "web-test-service"
         DEPLOYMENT_NAME = "web-test-deployment"
-        DOCKERHUB_USERNAME = "huytruongnguyen"
-        DOCKERHUB_TOKEN = "dckr_pat_KT4mPY8HZUDpQEvQJNBg_0c6LZ8"
         DOCKER_CONFIG_PATH = "${WORKSPACE}/.docker"
     }
 
