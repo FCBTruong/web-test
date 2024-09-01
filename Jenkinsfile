@@ -11,9 +11,6 @@ pipeline {
     }
 
     stages {
-        agent {
-            label 'kubeagent'
-        }
         stage('Checkout Code') {
             steps {
                 git branch: 'master', url: 'git@github.com:FCBTruong/web-test.git', credentialsId: 'github'
@@ -21,6 +18,9 @@ pipeline {
         }
 
         stage('Build and Push Docker Image') {
+            agent {
+                label 'kubeagent'
+            }
             steps {
                     container('kaniko') {
                         withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
