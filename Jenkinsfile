@@ -11,6 +11,9 @@ pipeline {
     }
 
     stages {
+        agent {
+            label 'kubeagent'
+        }
         stage('Checkout Code') {
             steps {
                 git branch: 'master', url: 'git@github.com:FCBTruong/web-test.git', credentialsId: 'github'
@@ -19,8 +22,8 @@ pipeline {
 
         stage('Build and Push Docker Image') {
             steps {
-                container('kaniko') {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
+                    container('kaniko') {
+                        withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
                         sh '''
                         mkdir -p ${DOCKER_CONFIG_PATH}
                         echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"${DOCKERHUB_USERNAME}\",\"password\":\"${DOCKERHUB_TOKEN}\"}}}" > ${DOCKER_CONFIG_PATH}/config.json
