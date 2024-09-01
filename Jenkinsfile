@@ -16,20 +16,38 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+         stage('Build and Push Docker Image') {
             steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
-                        sh '''
-                            echo "Building Docker image..."
-                            docker login -u ${DOCKERHUB_USERNAME} -p ${DOCKERHUB_TOKEN}
-                            docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
-                            docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
+                    container('kaniko') {
+                        script {
+                            sh '''
+                            echo "Building and pushing Docker image with Kaniko..."
+
+                            # Create a Docker config.json file with the DockerHub credentials
+                            mkdir -p /kaniko/.docker
+                            cat > /kaniko/.docker/config.json <<EOL
+                            {
+                                "auths": {
+                                    "https://index.docker.io/v1/": {
+                                        "auth": "$(echo -n ${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN} | base64)"
+                                    }
+                                }
+                            }
+                            EOL
+
+                            # Use Kaniko to build and push the Docker image
+                            /kaniko/executor \
+                                --context . \
+                                --dockerfile Dockerfile \
+                                --destination docker.io/${DOCKERHUB_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}
+
                             if [ $? -ne 0 ]; then
-                                echo "Error building Docker image. Exiting."
+                                echo "Error building Docker image with Kaniko. Exiting."
                                 exit 1
                             fi
-                        '''
+                            '''
+                        }
                     }
                 }
             }
