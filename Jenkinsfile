@@ -38,7 +38,6 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 echo "Deploying to Kubernetes..."
-                // Example:
                 // sh 'kubectl apply -f deployment.yaml -n ${KUBE_NAMESPACE}'
             }
         }
