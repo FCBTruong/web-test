@@ -10,14 +10,19 @@ pipeline {
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('Prepare Environment') {
             steps {
                 script {
-                    // Add GitHub SSH host key to known_hosts to prevent host key verification failures
+                    // Ensure the .ssh directory exists
                     sh 'mkdir -p ~/.ssh'
+                    // Add GitHub's SSH host key to known_hosts
                     sh 'ssh-keyscan github.com >> ~/.ssh/known_hosts'
                 }
-                // Checkout code from GitHub using the provided credentials
+            }
+        }
+
+        stage('Checkout Code') {
+            steps {
                 git branch: 'master', url: 'git@github.com:FCBTruong/web-test.git', credentialsId: 'github'
             }
         }
@@ -50,7 +55,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 echo "Deploying to Kubernetes..."
-                // Example deployment step
+                // Example:
                 // sh 'kubectl apply -f deployment.yaml -n ${KUBE_NAMESPACE}'
             }
         }
