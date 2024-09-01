@@ -21,18 +21,21 @@ pipeline {
             }
         }
 
-        stage('Checkout Code') {
-            steps {
-                git branch: 'master', url: 'git@github.com:FCBTruong/web-test.git', credentialsId: 'github'
-            }
-        }
-
         stage('Build and Push Docker Image') {
             agent {
                 label 'kubeagent'
             }
             steps {
                 container('kaniko') {
+                    script {
+                        // Ensure the .ssh directory exists in the Kaniko container
+                        sh 'mkdir -p ~/.ssh'
+                        // Add GitHub's SSH host key to known_hosts within the Kaniko container
+                        sh 'ssh-keyscan github.com >> ~/.ssh/known_hosts'
+                        // Checkout the repository inside the Kaniko container
+                        git branch: 'master', url: 'git@github.com:FCBTruong/web-test.git', credentialsId: 'github'
+                    }
+
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
                         sh '''
                         mkdir -p ${DOCKER_CONFIG_PATH}
