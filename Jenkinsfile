@@ -8,9 +8,9 @@
         DOCKER_CONFIG_PATH = "${WORKSPACE}/.docker"
         KANIKO_EXECUTOR_IMAGE = "gcr.io/kaniko-project/executor:latest"
     }
-    options {
-        // skipDefaultCheckout()
-    }
+    // options {
+    //      skipDefaultCheckout()
+    // }
 
     stages {
         stage('Build and Push Docker Image') {
