@@ -33,6 +33,7 @@ pipeline {
                 container('kaniko') {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
                         script {
+                            echo "Pushing image to ${DOCKER_IMAGE}"
                             sh '''
                                 mkdir -p /kaniko/.docker
 
@@ -46,13 +47,14 @@ pipeline {
                                 }
                                 EOF
 
-                                    /kaniko/executor --dockerfile `pwd`/Dockerfile \
-                                    --context `pwd` \
-                                    --push-retry 3 \
-                                    --destination ${DOCKER_IMAGE} \
-                                    --cleanup \
-                                    --cache=true \
-                                    --cache-repo=${DOCKER_IMAGE}-cache
+                                /kaniko/executor --dockerfile `pwd`/Dockerfile \
+                                --context `pwd` \
+                                --push-retry 3 \
+                                --destination ${DOCKER_IMAGE} \
+                                --cleanup \
+                                --cache=true \
+                                --cache-repo=${DOCKER_IMAGE}-cache
+                                --verbosity=debug
                             '''
                             echo "Docker image ${DOCKER_IMAGE} has been built and pushed to Docker Hub."
                         }
