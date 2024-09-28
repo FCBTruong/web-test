@@ -37,6 +37,7 @@ pipeline {
                             sh '''
                                 mkdir -p /kaniko/.docker
 
+                                echo "Creating docker config.json"
                                 cat <<EOF > /kaniko/.docker/config.json
                                 {
                                     "auths": {
