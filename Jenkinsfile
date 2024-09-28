@@ -33,7 +33,7 @@ pipeline {
         stage('Build and Push Docker Image') {
             steps {
                 sh 'ls -la /home/jenkins/workspace/web-test-pipeline'
-                sh 'ls -la `pwd`/Dockerfile'
+                sh 'ls -la `pwd`/web-test/Dockerfile'
                 container('kaniko') {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
                         sh '''
