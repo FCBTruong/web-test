@@ -2,6 +2,9 @@ pipeline {
     agent {
         label 'kubeagent'
     }
+    options {
+        skipDefaultCheckout()
+    }
     environment {
         DOCKER_IMAGE = "huytruongnguyen/web-test"
         KUBE_NAMESPACE = "gitops"
@@ -14,10 +17,15 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                script {
-                    sh 'ssh-keyscan github.com >> ~/.ssh/known_hosts'
+                withCredentials([sshUserPrivateKey(credentialsId: 'github', keyFileVariable: 'SSH_KEY')]) {
+                    sh '''
+                    mkdir -p ~/.ssh
+                    cp $SSH_KEY ~/.ssh/id_rsa
+                    chmod 600 ~/.ssh/id_rsa
+                    ssh-keyscan github.com >> ~/.ssh/known_hosts
+                    git clone ${GIT_REPO}
+                    '''
                 }
-                checkout scm
             }
         }
         stage('Build and Push Docker Image') {
