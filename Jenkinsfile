@@ -1,5 +1,7 @@
-    pipeline {
-    agent any
+pipeline {
+    agent {
+        label 'kubeagent'
+    }
     environment {
         DOCKER_IMAGE = "huytruongnguyen/web-test"
         KUBE_NAMESPACE = "gitops"
@@ -14,9 +16,6 @@
 
     stages {
         stage('Build and Push Docker Image') {
-            agent {
-                label 'kubeagent'
-            }
             steps {
                 sh 'ls -la `pwd`/Dockerfile'
                 container('kaniko') {
