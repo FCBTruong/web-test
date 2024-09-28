@@ -26,8 +26,6 @@ pipeline {
                     git clone git@github.com:FCBTruong/web-test.git .
                     '''
                 }
-                // check has code
-                sh 'ls -la web-test'
             }
         }
         stage('Build and Push Docker Image') {
