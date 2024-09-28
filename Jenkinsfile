@@ -23,7 +23,7 @@ pipeline {
                     cp $SSH_KEY ~/.ssh/id_rsa
                     chmod 600 ~/.ssh/id_rsa
                     ssh-keyscan github.com >> ~/.ssh/known_hosts
-                    git clone git@github.com:FCBTruong/web-test.git
+                    git clone git@github.com:FCBTruong/web-test.git .
                     '''
                 }
                 // check has code
@@ -33,7 +33,7 @@ pipeline {
         stage('Build and Push Docker Image') {
             steps {
                 sh 'ls -la /home/jenkins/workspace/web-test-pipeline'
-                sh 'ls -la `pwd`/web-test/Dockerfile'
+                sh 'ls -la `pwd`/Dockerfile'
                 container('kaniko') {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
                         sh '''
