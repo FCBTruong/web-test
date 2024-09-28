@@ -10,9 +10,17 @@ pipeline {
         DOCKER_CONFIG_PATH = "${WORKSPACE}/.docker"
         KANIKO_EXECUTOR_IMAGE = "gcr.io/kaniko-project/executor:latest"
     }
-    // options {
-    //      skipDefaultCheckout()
-    // }
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    sh 'ssh-keyscan github.com >> ~/.ssh/known_hosts'
+                }
+                checkout scm
+            }
+        }
+        // Rest of the stages
+    }
 
     stages {
         stage('Build and Push Docker Image') {
