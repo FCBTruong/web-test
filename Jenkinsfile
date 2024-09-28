@@ -34,7 +34,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
                         script {
                             echo "Pushing image to ${DOCKER_IMAGE}"
-                          sh '''
+                            sh '''
                                 echo "Step 1: Create Kaniko Docker directory"
                                 mkdir -p /kaniko/.docker
 
@@ -62,7 +62,6 @@ pipeline {
                                     --cleanup \
                                     --cache=true \
                                     --cache-repo=${DOCKER_IMAGE}-cache \
-                                    --verbosity=debug
                             '''
 
                         }
