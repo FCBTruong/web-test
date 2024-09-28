@@ -42,6 +42,31 @@ pipeline {
                             --cache=true \
                             --cache-repo=${DOCKER_IMAGE}-cache
                         '''
+                          script {
+                            sh '''
+                            mkdir -p /kaniko/.docker
+
+                            cat <<EOF > /kaniko/.docker/config.json
+                            {
+                                "auths": {
+                                    "https://index.docker.io/v1/": {
+                                        "auth": "$(echo -n "${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN}" | base64)"
+                                    }
+                                }
+                            }
+                            EOF
+
+                             /kaniko/executor --dockerfile `pwd`/Dockerfile \
+                                --context `pwd` \
+                                --push-retry 3 \
+                                --destination ${DOCKER_IMAGE} \
+                                --cleanup \
+                                --cache=true \
+                                --cache-repo=${DOCKER_IMAGE}-cache
+                            '''
+                        }
+                        echo "Docker image ${DOCKER_IMAGE}:${BUILD_NUMBER} has been built and pushed to Docker Hub."
+                    }
                     }
                 }
             }   
