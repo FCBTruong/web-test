@@ -35,35 +35,35 @@ pipeline {
                         script {
                             echo "Pushing image to ${DOCKER_IMAGE}"
                           sh '''
-    echo "Step 1: Create Kaniko Docker directory"
-    mkdir -p /kaniko/.docker
+                                echo "Step 1: Create Kaniko Docker directory"
+                                mkdir -p /kaniko/.docker
 
-    echo "Step 2: Generating base64 encoded auth string"
-    AUTH_STRING=$(echo -n "${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN}" | base64)
+                                echo "Step 2: Generating base64 encoded auth string"
+                                AUTH_STRING=$(echo -n "${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN}" | base64)
 
-    echo "Step 3: Creating docker config.json"
-    echo '{
-        "auths": {
-            "https://index.docker.io/v1/": {
-                "auth": "'"$AUTH_STRING"'"
-            }
-        }
-    }' > /kaniko/.docker/config.json
+                                echo "Step 3: Creating docker config.json"
+                                echo '{
+                                    "auths": {
+                                        "https://index.docker.io/v1/": {
+                                            "auth": "'"$AUTH_STRING"'"
+                                        }
+                                    }
+                                }' > /kaniko/.docker/config.json
 
-    echo "Step 4: Showing Docker config.json:"
-    cat /kaniko/.docker/config.json
+                                echo "Step 4: Showing Docker config.json:"
+                                cat /kaniko/.docker/config.json
 
-    echo "Step 5: Building and pushing image to ${DOCKER_IMAGE}"
+                                echo "Step 5: Building and pushing image to ${DOCKER_IMAGE}"
 
-    /kaniko/executor --dockerfile `pwd`/Dockerfile \
-        --context `pwd` \
-        --push-retry 3 \
-        --destination ${DOCKER_IMAGE} \
-        --cleanup \
-        --cache=true \
-        --cache-repo=${DOCKER_IMAGE}-cache \
-        --verbosity=debug
-'''
+                                /kaniko/executor --dockerfile `pwd`/Dockerfile \
+                                    --context `pwd` \
+                                    --push-retry 3 \
+                                    --destination ${DOCKER_IMAGE} \
+                                    --cleanup \
+                                    --cache=true \
+                                    --cache-repo=${DOCKER_IMAGE}-cache \
+                                    --verbosity=debug
+                            '''
 
                         }
                     }
