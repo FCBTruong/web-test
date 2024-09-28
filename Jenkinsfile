@@ -9,7 +9,7 @@
         KANIKO_EXECUTOR_IMAGE = "gcr.io/kaniko-project/executor:latest"
     }
     options {
-        skipDefaultCheckout()
+        // skipDefaultCheckout()
     }
 
     stages {
