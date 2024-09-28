@@ -47,16 +47,20 @@ pipeline {
                                 }
                                 EOF
 
+                                echo "Docker config.json:"
+                                cat /kaniko/.docker/config.json
+
+                                echo "Building and pushing image to ${DOCKER_IMAGE}"
+
                                 /kaniko/executor --dockerfile `pwd`/Dockerfile \
-                                --context `pwd` \
-                                --push-retry 3 \
-                                --destination ${DOCKER_IMAGE} \
-                                --cleanup \
-                                --cache=true \
-                                --cache-repo=${DOCKER_IMAGE}-cache
-                                --verbosity=debug
+                                    --context `pwd` \
+                                    --push-retry 3 \
+                                    --destination ${DOCKER_IMAGE} \
+                                    --cleanup \
+                                    --cache=true \
+                                    --cache-repo=${DOCKER_IMAGE}-cache \
+                                    --verbosity=debug
                             '''
-                            echo "Docker image ${DOCKER_IMAGE} has been built and pushed to Docker Hub."
                         }
                     }
                 }
