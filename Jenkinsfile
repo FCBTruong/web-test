@@ -26,10 +26,13 @@ pipeline {
                     git clone git@github.com:FCBTruong/web-test.git
                     '''
                 }
+                // check has code
+                sh 'ls -la web-test'
             }
         }
         stage('Build and Push Docker Image') {
             steps {
+                sh 'ls -la /home/jenkins/workspace/web-test-pipeline'
                 sh 'ls -la `pwd`/Dockerfile'
                 container('kaniko') {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
