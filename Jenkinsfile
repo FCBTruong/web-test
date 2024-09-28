@@ -67,7 +67,6 @@ pipeline {
                         }
                         echo "Docker image ${DOCKER_IMAGE}:${BUILD_NUMBER} has been built and pushed to Docker Hub."
                     }
-                    }
                 }
             }   
         }
