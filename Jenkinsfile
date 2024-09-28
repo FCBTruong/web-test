@@ -54,8 +54,8 @@ pipeline {
                                     --cache=true \
                                     --cache-repo=${DOCKER_IMAGE}-cache
                             '''
+                            echo "Docker image ${DOCKER_IMAGE} has been built and pushed to Docker Hub."
                         }
-                        echo "Docker image ${DOCKER_IMAGE}:${BUILD_NUMBER} has been built and pushed to Docker Hub."
                     }
                 }
             }   
