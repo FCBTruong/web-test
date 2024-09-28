@@ -10,6 +10,7 @@ pipeline {
         DOCKER_CONFIG_PATH = "${WORKSPACE}/.docker"
         KANIKO_EXECUTOR_IMAGE = "gcr.io/kaniko-project/executor:latest"
     }
+
     stages {
         stage('Checkout') {
             steps {
@@ -19,10 +20,6 @@ pipeline {
                 checkout scm
             }
         }
-        // Rest of the stages
-    }
-
-    stages {
         stage('Build and Push Docker Image') {
             steps {
                 sh 'ls -la `pwd`/Dockerfile'
