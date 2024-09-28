@@ -30,39 +30,29 @@ pipeline {
         }
         stage('Build and Push Docker Image') {
             steps {
-                sh 'ls -la /home/jenkins/workspace/web-test-pipeline'
-                sh 'ls -la `pwd`/Dockerfile'
                 container('kaniko') {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_TOKEN')]) {
-                        sh '''
-                        /kaniko/executor --dockerfile `pwd`/Dockerfile \
-                            --context `pwd` \
-                            --destination ${DOCKER_IMAGE} \
-                            --cleanup \
-                            --cache=true \
-                            --cache-repo=${DOCKER_IMAGE}-cache
-                        '''
-                          script {
+                        script {
                             sh '''
-                            mkdir -p /kaniko/.docker
+                                mkdir -p /kaniko/.docker
 
-                            cat <<EOF > /kaniko/.docker/config.json
-                            {
-                                "auths": {
-                                    "https://index.docker.io/v1/": {
-                                        "auth": "$(echo -n "${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN}" | base64)"
+                                cat <<EOF > /kaniko/.docker/config.json
+                                {
+                                    "auths": {
+                                        "https://index.docker.io/v1/": {
+                                            "auth": "$(echo -n "${DOCKERHUB_USERNAME}:${DOCKERHUB_TOKEN}" | base64)"
+                                        }
                                     }
                                 }
-                            }
-                            EOF
+                                EOF
 
-                             /kaniko/executor --dockerfile `pwd`/Dockerfile \
-                                --context `pwd` \
-                                --push-retry 3 \
-                                --destination ${DOCKER_IMAGE} \
-                                --cleanup \
-                                --cache=true \
-                                --cache-repo=${DOCKER_IMAGE}-cache
+                                    /kaniko/executor --dockerfile `pwd`/Dockerfile \
+                                    --context `pwd` \
+                                    --push-retry 3 \
+                                    --destination ${DOCKER_IMAGE} \
+                                    --cleanup \
+                                    --cache=true \
+                                    --cache-repo=${DOCKER_IMAGE}-cache
                             '''
                         }
                         echo "Docker image ${DOCKER_IMAGE}:${BUILD_NUMBER} has been built and pushed to Docker Hub."
