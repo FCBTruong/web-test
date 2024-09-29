@@ -7,13 +7,10 @@ image:
   pullPolicy: IfNotPresent
 
 service:
-  type: ClusterIP
-  port: 80
+  type: NodePort
+  port: 3000
+  targetPort: 3000
+  nodePort: 31577
 
 ingress:
-  enabled: true
-  annotations: {}
-  hosts:
-    - host: web-test.example.com
-      paths: ["/"]
-  tls: []
+  enabled: false
