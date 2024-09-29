@@ -75,17 +75,22 @@ pipeline {
         // Deploy using Helm
         stage('Deploy to Kubernetes') {
             steps {
-                echo "Deploying to Kubernetes using Helm..."
+                script {
+                    container('helm') {
+                        echo "Deploying to Kubernetes using Helm..."
 
-                // Update the image in the Helm values and deploy using Helm
-                sh '''
-                helm upgrade --install ${HELM_RELEASE_NAME} ${HELM_CHART_PATH} \
-                    --set image.repository=${DOCKER_IMAGE} \
-                    --set image.tag=latest \
-                    --namespace ${KUBE_NAMESPACE} --create-namespace
-                '''
+                        // Update the image in the Helm values and deploy using Helm
+                        sh '''
+                        helm upgrade --install ${HELM_RELEASE_NAME} ${HELM_CHART_PATH} \
+                            --set image.repository=${DOCKER_IMAGE} \
+                            --set image.tag=latest \
+                            --namespace ${KUBE_NAMESPACE} --create-namespace
+                        '''
+                    }
+                }
             }
         }
+
     }
 
     post {
