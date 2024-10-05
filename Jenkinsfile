@@ -81,7 +81,7 @@ pipeline {
 
                         // Package the Helm chart
                         sh '''
-                        helm package ${HELM_CHART_PATH} --destination ./charts
+                        helm package ${HELM_CHART_PATH} --destination ./charts --version ${BUILD_NUMBER}
                         '''
                     }
                 }
@@ -100,7 +100,7 @@ pipeline {
                             // Push the Helm chart to Harbor using curl
                             sh '''
                             curl -u ${HARBOR_USERNAME}:${HARBOR_PASSWORD} \
-                            --data-binary "@./charts/${HELM_RELEASE_NAME}-${BUILD_NUMBER}.tgz" \
+                            --data-binary "@./charts/${HELM_CHART_PATH}-${BUILD_NUMBER}.tgz" \
                             "https://${HARBOR_URL}/api/chartrepo/${HARBOR_PROJECT}/charts"
                             '''
                         }
