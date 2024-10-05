@@ -101,7 +101,7 @@ pipeline {
                             sh '''
                             curl -u ${HARBOR_USERNAME}:${HARBOR_PASSWORD} \
                             --data-binary "@./${HELM_CHART_PATH}-chart-${BUILD_NUMBER}.tgz" \
-                            "https://${HARBOR_URL}/api/chartrepo/dev/charts"
+                            "${HARBOR_URL}/api/chartrepo/dev/charts"
                             '''
                         }
                     }
