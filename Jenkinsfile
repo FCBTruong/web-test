@@ -98,7 +98,7 @@ pipeline {
                         withCredentials([usernamePassword(credentialsId: 'harbor-creds', passwordVariable: 'HARBOR_PASSWORD', usernameVariable: 'HARBOR_USERNAME')]) {
                            // Helm login to Harbor using HTTP
                             sh '''
-                            echo ${HARBOR_PASSWORD} | helm registry login --username ${HARBOR_USERNAME} --password-stdin ${HARBOR_URL}
+                            echo ${HARBOR_PASSWORD} | helm registry login --username ${HARBOR_USERNAME} --password-stdin --insecure ${HARBOR_URL}
                             '''
 
                             // Push the Helm chart to Harbor using HTTP
