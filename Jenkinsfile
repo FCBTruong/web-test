@@ -104,7 +104,7 @@ pipeline {
 
                             // Push the Helm chart to Harbor using OCI
                             sh '''
-                            helm push ./charts/${HELM_CHART_PATH}-${BUILD_NUMBER}.tgz oci://${HARBOR_URL}/dev
+                            helm push --insecure ./charts/${HELM_CHART_PATH}-${BUILD_NUMBER}.tgz oci://${HARBOR_URL}/dev
                             '''
                         }
                     }
