@@ -14,7 +14,7 @@ pipeline {
         KANIKO_EXECUTOR_IMAGE = "gcr.io/kaniko-project/executor:latest"
         HELM_RELEASE_NAME = "web-test-release"
         HELM_CHART_PATH = "./charts/web-test"  // Path to your Helm chart directory
-        HARBOR_URL = "http://192.168.49.2:30002"
+        HARBOR_URL = "192.168.49.2:30002"
     }
 
     stages {
@@ -103,7 +103,7 @@ pipeline {
 
                             // Push the Helm chart to Harbor using HTTP
                             sh '''
-                            helm push ./charts/${HELM_CHART_PATH}-${BUILD_NUMBER}.tgz ${HARBOR_URL}/dev
+                            helm push ./charts/${HELM_CHART_PATH}-${BUILD_NUMBER}.tgz oci://${HARBOR_URL}/dev
                             '''
                         }
                     }
