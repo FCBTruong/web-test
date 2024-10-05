@@ -100,7 +100,7 @@ pipeline {
                             // Push the Helm chart to Harbor using curl
                             sh '''
                             curl -u ${HARBOR_USERNAME}:${HARBOR_PASSWORD} \
-                            --data-binary "@./charts/${HELM_CHART_PATH}-${BUILD_NUMBER}.tgz" \
+                            --data-binary "@./${HELM_CHART_PATH}-chart-${BUILD_NUMBER}.tgz" \
                             "https://${HARBOR_URL}/api/chartrepo/${HARBOR_PROJECT}/charts"
                             '''
                         }
