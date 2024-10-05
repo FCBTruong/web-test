@@ -96,15 +96,14 @@ pipeline {
 
                         // Set Harbor credentials (use credentials store in Jenkins)
                         withCredentials([usernamePassword(credentialsId: 'harbor-creds', passwordVariable: 'HARBOR_PASSWORD', usernameVariable: 'HARBOR_USERNAME')]) {
-                            
-                            // Helm login to Harbor
+                           // Helm login to Harbor using HTTP
                             sh '''
-                            echo ${HARBOR_PASSWORD} | helm registry login ${HARBOR_URL} --username ${HARBOR_USERNAME} --password-stdin
+                            echo ${HARBOR_PASSWORD} | helm registry login --username ${HARBOR_USERNAME} --password-stdin ${HARBOR_URL}
                             '''
 
-                            // Push the Helm chart to Harbor using OCI
+                            // Push the Helm chart to Harbor using HTTP
                             sh '''
-                            helm push --insecure ./charts/${HELM_CHART_PATH}-${BUILD_NUMBER}.tgz oci://${HARBOR_URL}/dev
+                            helm push ./charts/${HELM_CHART_PATH}-${BUILD_NUMBER}.tgz ${HARBOR_URL}/dev
                             '''
                         }
                     }
