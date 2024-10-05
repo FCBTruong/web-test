@@ -14,6 +14,7 @@ pipeline {
         KANIKO_EXECUTOR_IMAGE = "gcr.io/kaniko-project/executor:latest"
         HELM_RELEASE_NAME = "web-test-release"
         HELM_CHART_PATH = "./charts/web-test"  // Path to your Helm chart directory
+        HARBOR_URL = "localhost:8082"
     }
 
     stages {
@@ -71,6 +72,42 @@ pipeline {
         //         }
         //     }   
         // }
+
+        stage('Build Helm Chart') {
+            steps {
+                script {
+                    container('helm') {
+                        echo "Packaging Helm Chart..."
+
+                        // Package the Helm chart
+                        sh '''
+                        helm package ${HELM_CHART_PATH} --destination ./charts
+                        '''
+                    }
+                }
+            }
+        }
+        
+        stage('Upload to Harbor') {
+            steps {
+                script {
+                    container('helm') {
+                        echo "Uploading Helm Chart to Harbor..."
+
+                        // Set Harbor credentials (use credentials store in Jenkins)
+                        withCredentials([usernamePassword(credentialsId: 'harbor-creds', passwordVariable: 'HARBOR_PASSWORD', usernameVariable: 'HARBOR_USERNAME')]) {
+                            
+                            // Push the Helm chart to Harbor using curl
+                            sh '''
+                            curl -u ${HARBOR_USERNAME}:${HARBOR_PASSWORD} \
+                            --data-binary "@./charts/${HELM_RELEASE_NAME}-${BUILD_NUMBER}.tgz" \
+                            "https://${HARBOR_URL}/api/chartrepo/${HARBOR_PROJECT}/charts"
+                            '''
+                        }
+                    }
+                }
+            }
+        }
 
         // Deploy using Helm
         stage('Deploy to Kubernetes') {
