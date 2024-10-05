@@ -101,11 +101,10 @@ pipeline {
                             echo ${HARBOR_PASSWORD} | helm registry login --username ${HARBOR_USERNAME} --password-stdin --insecure ${HARBOR_URL}
                             '''
 
+                            // Push the Helm chart to Harbor using HTTP
                             sh '''
-                                export HELM_EXPERIMENTAL_OCI=1
-                                export OCI_REGISTRY=http://${HARBOR_URL}/dev
-                                helm push ${HELM_CHART_PATH}-chart-${BUILD_NUMBER}.tgz oci://${HARBOR_URL}/dev --insecure-skip-tls-verify
-                                '''
+                            helm push ${HELM_CHART_PATH}-chart-${BUILD_NUMBER}.tgz http://${HARBOR_URL}/dev --insecure-skip-tls-verify
+                            '''
                         }
                     }
                 }
