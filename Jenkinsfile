@@ -103,7 +103,7 @@ pipeline {
 
                             // Push the Helm chart to Harbor using HTTP
                             sh '''
-                            helm push ./charts/${HELM_CHART_PATH}-${BUILD_NUMBER}.tgz oci://${HARBOR_URL}/dev
+                            helm push ./${HELM_CHART_PATH}-${BUILD_NUMBER}.tgz oci://${HARBOR_URL}/dev
                             '''
                         }
                     }
