@@ -18,19 +18,19 @@ pipeline {
     }
 
     stages {
-        // stage('Checkout') {
-        //     steps {
-        //         withCredentials([sshUserPrivateKey(credentialsId: 'github', keyFileVariable: 'SSH_KEY')]) {
-        //             sh '''
-        //             mkdir -p ~/.ssh
-        //             cp $SSH_KEY ~/.ssh/id_rsa
-        //             chmod 600 ~/.ssh/id_rsa
-        //             ssh-keyscan github.com >> ~/.ssh/known_hosts
-        //             git clone git@github.com:FCBTruong/web-test-ci-cd.git .
-        //             '''
-        //         }
-        //     }
-        // }
+        stage('Checkout') {
+            steps {
+                withCredentials([sshUserPrivateKey(credentialsId: 'github', keyFileVariable: 'SSH_KEY')]) {
+                    sh '''
+                    mkdir -p ~/.ssh
+                    cp $SSH_KEY ~/.ssh/id_rsa
+                    chmod 600 ~/.ssh/id_rsa
+                    ssh-keyscan github.com >> ~/.ssh/known_hosts
+                    git clone git@github.com:FCBTruong/web-test-ci-cd.git .
+                    '''
+                }
+            }
+        }
         // stage('Build and Push Docker Image') {
         //     steps {
         //         container('kaniko') {
