@@ -14,7 +14,7 @@ pipeline {
         KANIKO_EXECUTOR_IMAGE = "gcr.io/kaniko-project/executor:latest"
         HELM_RELEASE_NAME = "web-test-release"
         HELM_CHART_PATH = "./charts/web-test"  // Path to your Helm chart directory
-        HARBOR_URL = "localhost:8082"
+        HARBOR_URL = "localhost:8081"
     }
 
     stages {
@@ -101,7 +101,7 @@ pipeline {
                             sh '''
                             curl -u ${HARBOR_USERNAME}:${HARBOR_PASSWORD} \
                             --data-binary "@./${HELM_CHART_PATH}-chart-${BUILD_NUMBER}.tgz" \
-                            "https://${HARBOR_URL}/api/chartrepo/${HARBOR_PROJECT}/charts"
+                            "https://${HARBOR_URL}/api/chartrepo/dev/charts"
                             '''
                         }
                     }
