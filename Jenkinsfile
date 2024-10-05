@@ -14,7 +14,7 @@ pipeline {
         KANIKO_EXECUTOR_IMAGE = "gcr.io/kaniko-project/executor:latest"
         HELM_RELEASE_NAME = "web-test-release"
         HELM_CHART_PATH = "./charts/web-test"  // Path to your Helm chart directory
-        HARBOR_URL = "192.168.49.2:30002"
+        HARBOR_URL = "http://192.168.49.2:30002"
     }
 
     stages {
