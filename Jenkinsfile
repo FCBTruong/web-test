@@ -104,7 +104,7 @@ pipeline {
                             sh '''
                                 export HELM_EXPERIMENTAL_OCI=1
                                 export HELM_OCI_REGISTRY=http://${HARBOR_URL} 
-                                helm push ${HELM_CHART_PATH}-chart-${BUILD_NUMBER}.tgz oci://${HARBOR_URL}/dev
+                                helm push ${HELM_CHART_PATH}-chart-${BUILD_NUMBER}.tgz oci://${HARBOR_URL}/dev --plain-http
                                 '''
 
                         }
