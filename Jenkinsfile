@@ -14,7 +14,7 @@ pipeline {
         KANIKO_EXECUTOR_IMAGE = "gcr.io/kaniko-project/executor:latest"
         HELM_RELEASE_NAME = "web-test-release"
         HELM_CHART_PATH = "./charts/web-test"  // Path to your Helm chart directory
-        HARBOR_URL = "192.168.49.2:30003"
+        HARBOR_URL = "192.168.49.2:30002"
     }
 
     stages {
@@ -98,13 +98,13 @@ pipeline {
                         withCredentials([usernamePassword(credentialsId: 'harbor-creds', passwordVariable: 'HARBOR_PASSWORD', usernameVariable: 'HARBOR_USERNAME')]) {
                            // Helm login to Harbor using HTTP
                             sh '''
-                            echo ${HARBOR_PASSWORD} | helm registry login --username ${HARBOR_USERNAME} --password-stdin ${HARBOR_URL}
+                            echo ${HARBOR_PASSWORD} | helm registry login --username ${HARBOR_USERNAME} --password-stdin --insecure ${HARBOR_URL}
                             '''
 
                             sh '''
                                 export HELM_EXPERIMENTAL_OCI=1
                                 export HELM_OCI_REGISTRY=http://${HARBOR_URL} 
-                                helm push ${HELM_CHART_PATH}-chart-${BUILD_NUMBER}.tgz oci://${HARBOR_URL}/dev 
+                                helm push ${HELM_CHART_PATH}-chart-${BUILD_NUMBER}.tgz oci://${HARBOR_URL}/dev --plain-http
                                 '''
 
                         }
