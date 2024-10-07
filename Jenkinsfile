@@ -73,45 +73,45 @@ pipeline {
         //     }   
         // }
 
-        stage('Build Helm Chart') {
-            steps {
-                script {
-                    container('helm') {
-                        echo "Packaging Helm Chart..."
+        // stage('Build Helm Chart') {
+        //     steps {
+        //         script {
+        //             container('helm') {
+        //                 echo "Packaging Helm Chart..."
 
-                        // Package the Helm chart
-                        sh '''
-                        helm package ${HELM_CHART_PATH} --destination ./charts --version ${BUILD_NUMBER}
-                        '''
-                    }
-                }
-            }
-        }
-        
-        stage('Upload to Harbor') {
-            steps {
-                script {
-                    container('helm') {
-                        echo "Uploading Helm Chart to Harbor..."
+        //                 // Package the Helm chart
+        //                 sh '''
+        //                 helm package ${HELM_CHART_PATH} --destination ./charts --version ${BUILD_NUMBER}
+        //                 '''
+        //             }
+        //         }
+        //     }
+        // }
 
-                        // Set Harbor credentials (use credentials store in Jenkins)
-                        withCredentials([usernamePassword(credentialsId: 'harbor-creds', passwordVariable: 'HARBOR_PASSWORD', usernameVariable: 'HARBOR_USERNAME')]) {
-                           // Helm login to Harbor using HTTP
-                            sh '''
-                            echo ${HARBOR_PASSWORD} | helm registry login --username ${HARBOR_USERNAME} --password-stdin --insecure ${HARBOR_URL}
-                            '''
+        // stage('Upload to Harbor') {
+        //     steps {
+        //         script {
+        //             container('helm') {
+        //                 echo "Uploading Helm Chart to Harbor..."
 
-                            sh '''
-                                export HELM_EXPERIMENTAL_OCI=1
-                                export HELM_OCI_REGISTRY=http://${HARBOR_URL} 
-                                helm push ${HELM_CHART_PATH}-chart-${BUILD_NUMBER}.tgz oci://${HARBOR_URL}/dev --plain-http
-                                '''
+        //                 // Set Harbor credentials (use credentials store in Jenkins)
+        //                 withCredentials([usernamePassword(credentialsId: 'harbor-creds', passwordVariable: 'HARBOR_PASSWORD', usernameVariable: 'HARBOR_USERNAME')]) {
+        //                    // Helm login to Harbor using HTTP
+        //                     sh '''
+        //                     echo ${HARBOR_PASSWORD} | helm registry login --username ${HARBOR_USERNAME} --password-stdin --insecure ${HARBOR_URL}
+        //                     '''
 
-                        }
-                    }
-                }
-            }
-        }
+        //                     sh '''
+        //                         export HELM_EXPERIMENTAL_OCI=1
+        //                         export HELM_OCI_REGISTRY=http://${HARBOR_URL} 
+        //                         helm push ${HELM_CHART_PATH}-chart-${BUILD_NUMBER}.tgz oci://${HARBOR_URL}/dev --plain-http
+        //                         '''
+
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         // Deploy using Helm
         stage('Deploy to Kubernetes') {
@@ -131,7 +131,6 @@ pipeline {
                 }
             }
         }
-
     }
 
     post {
