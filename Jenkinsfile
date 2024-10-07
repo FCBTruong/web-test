@@ -44,7 +44,7 @@ pipeline {
                         helm upgrade --install ${HELM_RELEASE_NAME} ${HELM_CHART_PATH} \
                             --set image.repository=${DOCKER_IMAGE} \
                             --set image.tag=latest \
-                            --namespace ${KUBE_NAMESPACE} --create-namespace
+                            --namespace ${KUBE_NAMESPACE}
                         '''
                     }
                 }
