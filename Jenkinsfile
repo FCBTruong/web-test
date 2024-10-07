@@ -15,6 +15,7 @@ pipeline {
         HELM_RELEASE_NAME = "web-test-release"
         HELM_CHART_PATH = "./charts/web-test"  // Path to your Helm chart directory
         HARBOR_URL = "192.168.49.2:30002"
+        KUBECONFIG_PATH = "/root/.kube/config"  // Path where kubeconfig will be placed inside the container
     }
 
     stages {
@@ -32,20 +33,35 @@ pipeline {
             }
         }
 
-        // Deploy using Helm
         stage('Deploy to Kubernetes') {
             steps {
                 script {
                     container('helm') {
                         echo "Deploying to Kubernetes using Helm..."
 
-                        // Update the image in the Helm values and deploy using Helm
-                        sh '''
-                        helm upgrade --install ${HELM_RELEASE_NAME} ${HELM_CHART_PATH} \
-                            --set image.repository=${DOCKER_IMAGE} \
-                            --set image.tag=latest \
-                            --namespace ${KUBE_NAMESPACE} --create-namespace
-                        '''
+                        // Helm command to deploy the chart
+                        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBE_CONFIG')]) {
+                            sh '''
+                            set -e
+
+                            echo "Copying kubeconfig into container..."
+                            mkdir -p /root/.kube
+                            cp ${KUBE_CONFIG} /root/.kube/config
+                            chmod 600 /root/.kube/config
+
+                            echo "Verifying Kubernetes context..."
+                            kubectl --kubeconfig /root/.kube/config config current-context
+
+                            echo "Running Helm upgrade/install command..."
+                            helm upgrade --install ${HELM_RELEASE_NAME} ${HELM_CHART_PATH} \
+                                --set image.repository=${DOCKER_IMAGE} \
+                                --set image.tag=latest \
+                                --namespace ${KUBE_NAMESPACE} --create-namespace \
+                                --kubeconfig /root/.kube/config
+
+                            echo "Helm deployment completed."
+                            '''
+                        }
                     }
                 }
             }
