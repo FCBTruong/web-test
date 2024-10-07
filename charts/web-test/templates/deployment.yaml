@@ -11,10 +11,13 @@ spec:
     metadata:
       labels:
         app: {{ .Values.name }}
+      annotations:
+        # This annotation will change whenever the image tag changes, forcing a redeploy
+        redeploy-hash: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
     spec:
       containers:
         - name: {{ .Values.name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: Always
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.port }}
