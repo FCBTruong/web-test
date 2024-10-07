@@ -7,7 +7,7 @@ pipeline {
     }
     environment {
         DOCKER_IMAGE = "huytruongnguyen/web-test"
-        KUBE_NAMESPACE = "gitops"
+        KUBE_NAMESPACE = "jenkins"
         SERVICE_NAME = "web-test-service"
         DEPLOYMENT_NAME = "web-test-deployment"
         DOCKER_CONFIG_PATH = "${WORKSPACE}/.docker"
